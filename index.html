@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Falcon 9 | SpaceX MVP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* FONTS */
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+        
+        body {
+            background-color: black;
+            color: white;
+            /* SpaceX uses D-DIN, we fallback to nice sans-serifs */
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        /* --- 1. HERO SECTION --- */
+        .hero-section {
+            height: 100vh;
+            width: 100%;
+            background-image: url('https://i.postimg.cc/T1qkNsPb/2026-01-03-18-15-59.png');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        /* --- 2. APPLE SQUARE STATS --- */
+        .stats-section {
+            padding: 150px 20px;
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            background-color: black;
+        }
+
+        .apple-square {
+            /* 
+             * MATH: 300px width. Shortest dimension = 250px height. 
+             * 1/3 of 250px ≈ 83px radius.
+             */
+            width: 300px;
+            height: 250px;
+            border-radius: 83px; 
+            
+            /* Glass aesthetics */
+            background: rgba(20, 20, 20, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            overflow: hidden;
+        }
+
+        .apple-square:hover {
+            transform: scale(1.05);
+            background: rgba(40, 40, 40, 0.8);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .stat-number {
+            font-size: 6rem;
+            font-weight: 100; /* Ultra thin */
+            line-height: 1;
+            margin-bottom: 5px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            text-transform: uppercase;
+            color: #ccc;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        /* --- 3. MORPH SECTION (SCROLL CONTROL) --- */
+        .morph-section {
+            /* Taller height creates more "time" to scroll the animation */
+            height: 250vh; 
+            position: relative;
+            background-color: black;
+        }
+
+        .sticky-viewport {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            width: 100%;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .morph-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            transition: opacity 0.1s linear; /* Smooth blend */
+        }
+
+        #layer-blueprint {
+            background-image: url('https://i.postimg.cc/pTM40zZr/image.png');
+            opacity: 1;
+            z-index: 1;
+        }
+
+        #layer-render {
+            /* UPDATED LINK HERE */
+            background-image: url('https://i.postimg.cc/85bg38KY/image.png');
+            opacity: 0;
+            z-index: 2;
+        }
+
+        /* --- 4. CAROUSEL SECTION (INTERACTIVE) --- */
+        .carousel-section {
+            height: 100vh;
+            background-color: black;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end; /* Controls at bottom */
+            overflow: hidden;
+        }
+
+        .carousel-display {
+            position: absolute;
+            inset: 0;
+            background-size: contain; /* Keeps entire text visible */
+            background-position: center;
+            background-repeat: no-repeat;
+            transition: background-image 0.4s ease-in-out, opacity 0.2s;
+        }
+
+        /* UI CONTROLS */
+        .carousel-ui {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            padding-bottom: 60px;
+            background: linear-gradient(to top, black 40%, transparent);
+        }
+
+        .main-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 25px;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: #888;
+            text-transform: uppercase;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: 1px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab-btn:hover { color: white; }
+        .tab-btn.active { color: white; border-bottom: 2px solid white; }
+
+        .sub-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            height: 30px; /* Pre-allocate space so layout doesn't jump */
+        }
+
+        .sub-btn {
+            background: transparent;
+            border: none;
+            color: #666;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-left: 1px solid #444; /* Divider style */
+            padding-left: 20px;
+            transition: color 0.3s;
+        }
+        .sub-btn:first-child { border-left: none; padding-left: 0; }
+        
+        .sub-btn:hover { color: #aaa; }
+        .sub-btn.active { color: white; }
+
+    </style>
+</head>
+<body>
+
+    <!-- HERO -->
+    <section class="hero-section"></section>
+
+    <!-- APPLE STATS -->
+    <section class="stats-section" id="statsTrigger">
+        <div class="apple-square">
+            <div class="stat-number" data-target="580">0</div>
+            <div class="stat-label">Completed Missions</div>
+        </div>
+        <div class="apple-square">
+            <div class="stat-number" data-target="534">0</div>
+            <div class="stat-label">Total Landings</div>
+        </div>
+        <div class="apple-square">
+            <div class="stat-number" data-target="501">0</div>
+            <div class="stat-label">Total Reflights</div>
+        </div>
+    </section>
+
+    <!-- MORPHING OVERVIEW -->
+    <section class="morph-section" id="morphSection">
+        <div class="sticky-viewport">
+            <!-- Blueprint (Bottom Layer) -->
+            <div id="layer-blueprint" class="morph-layer"></div>
+            <!-- Render (Top Layer - Fades In) -->
+            <div id="layer-render" class="morph-layer"></div>
+        </div>
+    </section>
+
+    <!-- INTERACTIVE CAROUSEL -->
+    <section class="carousel-section">
+        <div id="carousel-bg" class="carousel-display"></div>
+
+        <div class="carousel-ui">
+            <!-- Level 1: Main Stages -->
+            <div class="main-tabs" id="mainTabs">
+                <button class="tab-btn active" data-stage="first">First Stage</button>
+                <button class="tab-btn" data-stage="inter">Interstage</button>
+                <button class="tab-btn" data-stage="second">Second Stage</button>
+                <button class="tab-btn" data-stage="payload">Payload</button>
+            </div>
+
+            <!-- Level 2: Sub Options -->
+            <div class="sub-tabs" id="subTabs"></div>
+        </div>
+    </section>
+
+    <script>
+        // --- ASSET CONFIGURATION ---
+        const IMAGES = {
+            first: {
+                overview: 'https://i.postimg.cc/WzNphhhZ/2026-01-03-21-02-32.png',
+                engines:  'https://i.postimg.cc/xTNhL9M3/2026-01-03-21-02-59.png',
+                legs:     'https://i.postimg.cc/qRZDCF7Y/2026-01-03-21-03-18.png'
+            },
+            inter: {
+                overview: 'https://i.postimg.cc/jqDtk0yW/2026-01-03-21-03-28.png'
+            },
+            second: {
+                overview: 'https://i.postimg.cc/C1XTV5bT/2026-01-03-21-03-38.png'
+            },
+            payload: {
+                fairing: 'https://i.postimg.cc/3xBsxng5/2026-01-03-21-03-52.png',
+                dragon:  'https://i.postimg.cc/wMXWbjVD/2026-01-03-21-04-18.png'
+            }
+        };
+
+        // --- 1. STATS LOGIC ---
+        const statsSection = document.getElementById('statsTrigger');
+        const counters = document.querySelectorAll('.stat-number');
+        let hasCounted = false;
+
+        const startCounters = () => {
+            counters.forEach(counter => {
+                const target = +counter.getAttribute('data-target');
+                const duration = 1000; // 1 second
+                const start = performance.now();
+
+                const tick = (now) => {
+                    const progress = Math.min((now - start) / duration, 1);
+                    // Standard ease-out
+                    const ease = 1 - Math.pow(1 - progress, 3);
+                    
+                    counter.innerText = Math.floor(ease * target);
+                    
+                    if (progress < 1) requestAnimationFrame(tick);
+                    else counter.innerText = target;
+                };
+                requestAnimationFrame(tick);
+            });
+        };
+
+        new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && !hasCounted) {
+                startCounters();
+                hasCounted = true;
+            }
+        }, { threshold: 0.5 }).observe(statsSection);
+
+
+        // --- 2. SCROLL MORPH LOGIC ---
+        const morphSection = document.getElementById('morphSection');
+        const layerRender = document.getElementById('layer-render');
+
+        window.addEventListener('scroll', () => {
+            const rect = morphSection.getBoundingClientRect();
+            // Distance available to scroll within this section
+            const scrollDist = rect.height - window.innerHeight;
+            const scrolled = -rect.top; 
+
+            if (scrolled >= 0 && scrolled <= scrollDist) {
+                // Map scroll progress to opacity
+                // We multiply by 1.5 to make it fade in slightly faster than the scroll
+                let progress = (scrolled / scrollDist) * 1.5;
+                layerRender.style.opacity = Math.max(0, Math.min(1, progress));
+            }
+        });
+
+
+        // --- 3. CAROUSEL STATE MACHINE ---
+        const bg = document.getElementById('carousel-bg');
+        const mainTabs = document.getElementById('mainTabs');
+        const subTabs = document.getElementById('subTabs');
+
+        // Current State
+        let currentState = { stage: 'first', sub: 'overview' };
+
+        // Define Sub-menus
+        const SUB_MENUS = {
+            first:  ['Overview', 'Engines', 'Legs'],
+            inter:  ['Overview'],
+            second: ['Overview'],
+            payload:['Fairing', 'Dragon']
+        };
+
+        function renderSubTabs(stage) {
+            subTabs.innerHTML = '';
+            const items = SUB_MENUS[stage];
+            
+            // Logic: If only 1 item (Overview), don't show sub-tabs to keep it clean
+            if (items.length <= 1) return;
+
+            items.forEach(item => {
+                const key = item.toLowerCase();
+                const btn = document.createElement('button');
+                btn.className = `sub-btn ${key === currentState.sub ? 'active' : ''}`;
+                btn.innerText = item;
+                btn.onclick = () => updateState(stage, key);
+                subTabs.appendChild(btn);
+            });
+        }
+
+        function updateState(stage, sub = null) {
+            // If sub not provided, default to the first available option (usually 'overview')
+            if (!sub) sub = SUB_MENUS[stage][0].toLowerCase();
+
+            currentState = { stage, sub };
+
+            // 1. Highlight Main Tab
+            Array.from(mainTabs.children).forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.stage === stage);
+            });
+
+            // 2. Render and Highlight Sub Tabs
+            renderSubTabs(stage);
+
+            // 3. Update Image
+            const url = IMAGES[stage][sub];
+            if (url) {
+                bg.style.backgroundImage = `url('${url}')`;
+            }
+        }
+
+        // Initialize Main Tab Clicks
+        Array.from(mainTabs.children).forEach(btn => {
+            btn.onclick = () => updateState(btn.dataset.stage);
+        });
+
+        // Initialize First State
+        updateState('first');
+
+    </script>
+</body>
+</html>
